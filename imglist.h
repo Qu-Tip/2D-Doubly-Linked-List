@@ -9,8 +9,8 @@
 #ifndef _IMGLIST_H_
 #define _IMGLIST_H_
 
-#include "cs221util/PNG.h"
-#include "cs221util/RGBAPixel.h"
+#include "PNG.h"
+#include "RGBAPixel.h"
 
 using namespace std;
 using namespace cs221util;
