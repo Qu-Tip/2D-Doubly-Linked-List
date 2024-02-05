@@ -20,7 +20,8 @@
  */
 ImgList::ImgList() {
     // set appropriate values for all member attributes here
-	
+	northwest = NULL;
+    southeast = NULL;
 }
 
 /**
@@ -29,7 +30,52 @@ ImgList::ImgList() {
  */
 ImgList::ImgList(PNG& img) {
     // build the linked node structure and set the member attributes appropriately
-	
+
+    ImgNode* prev;
+	for (unsigned x = 0; x < img.width(); x++) {
+        for (unsigned y = 0; y < img.height(); y++) {
+            RGBAPixel* pixel = img.getPixel(x, y);
+            ImgNode* n = new ImgNode();
+
+            if (x == 0 && y == 0) {
+                northwest = n;
+            }
+
+            if ((x == img.width()-1) && (y == img.height()-1)) {
+                southeast = n;
+            }
+        
+            n->colour = pixel;
+
+            // set west/east pointers 
+            if (x == 0) {
+                prev = n;
+            } else {
+                prev->east = n;
+                n->west = prev;
+                prev = n;
+            }
+
+            // set north/south pointers
+            if (y > 0) {
+                RGBAPixel* p = img.getPixel(x, y-1);
+                ImgNode* above = new ImgNode();
+                above->south = n;
+                n->north = above;
+            }
+
+            // if (prev != NULL) {
+            //     n->west = prev;
+            //     prev->east = n;
+            // }
+
+            // if (y > 0) {
+            //     ImgNode* above
+            // }
+        }
+
+        // prev = NULL;    // start new row
+    }
 }
 
 /************
