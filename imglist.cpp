@@ -34,15 +34,15 @@ ImgList::ImgList(PNG& img) {
     ImgNode* prev;
     ImgNode* above;
     ImgNode* firstInRow;
-	for (unsigned x = 0; x < img.width(); x++) {
-        for (unsigned y = 0; y < img.height(); y++) {
+	for (unsigned y = 0; y < img.height(); y++) {
+        for (unsigned x = 0; x < img.width(); x++) {
             RGBAPixel* pixel = img.getPixel(x, y);
             ImgNode* n = new ImgNode();
             n->colour = *pixel;
 
             if (x == 0 && y == 0) {
                 northwest = n;
-                above = northwest;
+                above = n;
             }
 
             if ((x == img.width()-1) && (y == img.height()-1)) {
