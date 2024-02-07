@@ -36,6 +36,7 @@ ImgList::ImgList(PNG& img) {
         for (unsigned y = 0; y < img.height(); y++) {
             RGBAPixel* pixel = img.getPixel(x, y);
             ImgNode* n = new ImgNode();
+            n->colour = *pixel;
 
             if (x == 0 && y == 0) {
                 northwest = n;
@@ -44,8 +45,6 @@ ImgList::ImgList(PNG& img) {
             if ((x == img.width()-1) && (y == img.height()-1)) {
                 southeast = n;
             }
-        
-            n->colour = pixel;
 
             // set west/east pointers 
             if (x == 0) {
@@ -63,18 +62,7 @@ ImgList::ImgList(PNG& img) {
                 above->south = n;
                 n->north = above;
             }
-
-            // if (prev != NULL) {
-            //     n->west = prev;
-            //     prev->east = n;
-            // }
-
-            // if (y > 0) {
-            //     ImgNode* above
-            // }
         }
-
-        // prev = NULL;    // start new row
     }
 }
 
@@ -91,7 +79,18 @@ ImgList::ImgList(PNG& img) {
  */
 unsigned int ImgList::GetDimensionX() const {
     // replace the following line with your implementation
-    return -1;
+    ImgNode* n = northwest;
+    int dim = 0;
+    while (n->east != NULL) {
+        dim = dim + 1 + n->skipright;           // add current node + any skipped
+        n = n->east;
+    }
+
+    // last node in the row
+    dim = dim + 1 + n->skipright;
+    delete n;
+    n = NULL;
+    return dim;
 }
 
 /**
