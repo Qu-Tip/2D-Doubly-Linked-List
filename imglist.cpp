@@ -32,6 +32,8 @@ ImgList::ImgList(PNG& img) {
     // build the linked node structure and set the member attributes appropriately
 
     ImgNode* prev;
+    ImgNode* above;
+    ImgNode* firstInRow;
 	for (unsigned x = 0; x < img.width(); x++) {
         for (unsigned y = 0; y < img.height(); y++) {
             RGBAPixel* pixel = img.getPixel(x, y);
@@ -40,6 +42,7 @@ ImgList::ImgList(PNG& img) {
 
             if (x == 0 && y == 0) {
                 northwest = n;
+                above = northwest;
             }
 
             if ((x == img.width()-1) && (y == img.height()-1)) {
@@ -49,6 +52,7 @@ ImgList::ImgList(PNG& img) {
             // set west/east pointers 
             if (x == 0) {
                 prev = n;
+                firstInRow = n;                 // for north/south pointers
             } else {
                 prev->east = n;
                 n->west = prev;
@@ -57,10 +61,13 @@ ImgList::ImgList(PNG& img) {
 
             // set north/south pointers
             if (y > 0) {
-                RGBAPixel* p = img.getPixel(x, y-1);
-                ImgNode* above = new ImgNode();
                 above->south = n;
                 n->north = above;
+                if (above->east != NULL) {
+                    above = above->east;
+                } else {
+                    above = firstInRow;
+                }
             }
         }
     }
