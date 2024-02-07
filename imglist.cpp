@@ -49,14 +49,16 @@ ImgList::ImgList(PNG& img) {
                 southeast = n;
             }
 
-            // set west/east pointers 
             if (x == 0) {
                 prev = n;
-                firstInRow = n;                 // for north/south pointers
-            } else {
+                firstInRow = n;                 
+            } 
+            
+            // set west/east pointers 
+            if (x > 0) {
                 prev->east = n;
                 n->west = prev;
-                prev = n;
+                prev = prev->east;
             }
 
             // set north/south pointers
