@@ -112,7 +112,16 @@ unsigned int ImgList::GetDimensionX() const {
  */
 unsigned int ImgList::GetDimensionY() const {
     // replace the following line with your implementation
-    return -1;
+    ImgNode* n = northwest;
+    int dim = 0;
+    while (n->south != NULL) {
+        dim += 1;
+        n = n->south;
+    }
+
+    delete n;
+    n = NULL;
+    return dim + 1;
 }
 
 /**
