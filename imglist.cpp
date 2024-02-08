@@ -118,9 +118,6 @@ unsigned int ImgList::GetDimensionY() const {
         dim += 1;
         n = n->south;
     }
-
-    delete n;
-    n = NULL;
     return dim + 1;
 }
 
