@@ -19,7 +19,8 @@
  * Default constructor. Makes an empty list
  */
 ImgList::ImgList() {
-    // set appropriate values for all member attributes here
+    northwest = NULL;
+    southeast = NULL;
 	
 }
 
@@ -29,7 +30,50 @@ ImgList::ImgList() {
  */
 ImgList::ImgList(PNG& img) {
     // build the linked node structure and set the member attributes appropriately
-	
+
+    northwest = new ImgNode();
+    northwest->colour.r = img.getPixel(0, 0)->r;
+    northwest->colour.g = img.getPixel(0, 0)->g;
+    northwest->colour.b = img.getPixel(0, 0)->b;
+    northwest->colour.a = img.getPixel(0, 0)->a;
+
+    southeast = new ImgNode();
+    southeast->colour.r = img.getPixel(img.width() - 1 , img.height() - 1 )->r;
+    southeast->colour.g = img.getPixel(img.width() - 1 , img.height() - 1)->g;
+    southeast->colour.b = img.getPixel(img.width() - 1 , img.height() - 1)->b;
+    southeast->colour.a = img.getPixel(img.width() - 1 , img.height() - 1)->a;
+
+    ImgNode* prev = northwest;
+    ImgNode* curr = NULL;
+    
+
+	for (unsigned x = 0; x < img.width(); x++) {
+        for (unsigned y = 0; y < img.height(); y++) {
+
+            curr = new ImgNode();
+            ImgNode nodes[img.width() - 1];
+
+            curr->colour.r = img.getPixel(x, y)->r;
+            curr->colour.g = img.getPixel(x, y)->g;
+            curr->colour.b = img.getPixel(x, y)->b;
+            curr->colour.a = img.getPixel(x, y)->a;
+
+            if (x > 0) {
+                prev->east = curr;
+                curr->west = prev;
+                nodes[x] = this;
+            } else {
+                ImgNode nodes[img.width() - 1];
+                nodes[0] = this;
+
+            }
+
+            if (y > 0) {
+                //tODO
+            }
+    }
+  }
+
 }
 
 /************
