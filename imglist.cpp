@@ -87,16 +87,16 @@ ImgList::ImgList(PNG& img) {
  *   x dimension.
  */
 unsigned int ImgList::GetDimensionX() const {
-    // replace the following line with your implementation
+    // replace the following line with your implementation    
     ImgNode* n = northwest;
     int dim = 0;
     while (n->east != NULL) {
-        dim = dim + 1 + n->skipright;           // add current node + any skipped
+        dim = dim + 1; //+ n->skipright;           // add current node + any skipped      Note: I changed this bc render needs a getter without skips
         n = n->east;
     }
 
     // last node in the row
-    dim = dim + 1 + n->skipright;
+    dim = dim + 1; //+ n->skipright;
     delete n;
     n = NULL;
     return dim;
@@ -135,19 +135,13 @@ unsigned int ImgList::GetDimensionFullX() const {
     // replace the following line with your implementation
     ImgNode* n = northwest;
     int dim = 0;
-
-    while (n != NULL) {
-
-        if (n->skipright != 0) {  //assume northwest does not have skipped left nodes
-        dim += n->skipright + 1;
-        } 
-
-    dim += 1;
-
-    n = n->east;
-
+    while (n->east != NULL) {
+        dim = dim + 1 + n->skipright;           // add current node + any skipped
+        n = n->east;
     }
 
+    // last node in the row
+    dim = dim + 1 + n->skipright;
     return dim;
 
 }
@@ -238,8 +232,85 @@ ImgNode* ImgList::SelectNode(ImgNode* rowstart, int selectionmode) {
  */
 PNG ImgList::Render(bool fillgaps, int fillmode) const {
     // Add/complete your implementation below
-  
-    PNG outpng; //this will be returned later. Might be a good idea to resize it at some point.
+    PNG outpng;
+    unsigned x = 0;
+    unsigned y = 0;
+    ImgNode* n = northwest;
+    RGBAPixel* px;
+
+    if (fillgaps == false) {
+        outpng.resize(this->GetDimensionX(), this->GetDimensionY());
+    } else {
+        outpng.resize(this->GetDimensionFullX(), this->GetDimensionY());
+    }
+
+    for (ImgNode* n = northwest; n != NULL; n = n->south) {
+            
+        while (n != NULL) {
+
+            if (fillgaps == false) {
+            *outpng.getPixel(x, y) = n->colour;
+            n = n->east;
+            x++;
+            } else {
+
+                if (fillmode == 0) {
+                    *outpng.getPixel(x, y) = n->colour;
+                    if (n->skipright != 0) {
+                        for (int i = x + 1; i <= x + n->skipright; i++) {
+                            *outpng.getPixel(i, y) = n->colour;
+                        }
+                    }
+
+                    n = n->east;
+                    x += n->skipright;
+
+                } else if (fillmode == 1) {
+
+                    *outpng.getPixel(x, y) = n->colour;
+
+                    if (n->skipright != 0) {
+                        for (int i = x + 1; i <= x + n->skipright; i++) {
+
+                            px = outpng.getPixel(i, y);
+
+                            px->r = ((n->colour.r + n->east->colour.r)/2);
+                            px->g = ((n->colour.g + n->east->colour.g)/2);
+                            px->b = ((n->colour.b + n->east->colour.b)/2);
+                              
+                        }
+
+                        n = n->east;
+                        x += n->skipright + 1;
+
+                    }
+
+                   
+                    n = n->east;
+                    x += n->skipright + 1;
+
+                } else if (fillmode == 2) {
+
+                    *outpng.getPixel(x, y) = n->colour;
+                    if (n->skipright != 0) {
+                        for (int i = x + 1; i <= x + n->skipright; i++) {
+
+                            //TODO : help
+                        }
+                    }
+
+                    n = n->east;
+                    x += n->skipright + 1;
+
+                }
+
+            }
+
+        }
+
+        x=0;
+        y++;
+    }
   
     return outpng;
 }
@@ -257,11 +328,40 @@ PNG ImgList::Render(bool fillgaps, int fillmode) const {
  * @param this list has had one node removed from each row. Neighbours of the created
  *       gaps are linked appropriately, and their skip values are updated to reflect
  *       the size of the gap.
+ * 
+ *  *  selectionmode - criterion used for choosing the node to return
+ *          0: minimum "brightness" across row, not including extreme left or right nodes
+ *          1: node with minimum total of "colour difference" with its left neighbour and with its right neighbour.
+ *        In the (likely) case of multiple candidates that best match the criterion,
+ *        the left-most node satisfying the criterion (excluding the row's starting node)
+ *        will be returned.
  */
 void ImgList::Carve(int selectionmode) {
-    // add your implementation here
-	
-}
+    ImgNode* n = northwest;
+    ImgNode* selected;
+
+    while (n->south != NULL) {
+        selected = SelectNode(n, selectionmode);
+        selected->west->east = selected->east;
+        selected->west->skipright++;
+        selected->east->west = selected->west;
+        selected->west->skipleft++;
+        delete selected;
+        selected = NULL;
+
+        n = n->south;
+        }
+        
+        selected = SelectNode(n, selectionmode);
+        selected->west->east = selected->east;
+        selected->west->skipright++;
+        selected->east->west = selected->west;
+        selected->west->skipleft++;
+        delete selected;
+        selected = NULL;
+
+    }
+
 
 // note that a node on the boundary will never be selected for removal
 /**
@@ -276,9 +376,20 @@ void ImgList::Carve(int selectionmode) {
  * @post this list has had "rounds" nodes removed from each row. Neighbours of the created
  *       gaps are linked appropriately, and their skip values are updated to reflect
  *       the size of the gap.
+ * 
+
  */
 void ImgList::Carve(unsigned int rounds, int selectionmode) {
-    // add your implementation here
+    if (rounds > (this->GetDimensionX() -2)) {
+
+        for (unsigned x = 0; x < (this->GetDimensionX() -2); x++) {
+            this->Carve(selectionmode);
+        }
+    } else {
+        for (unsigned x = 0; x < rounds; x++) {
+            this->Carve(selectionmode);
+        }
+    }
 	
 }
 
