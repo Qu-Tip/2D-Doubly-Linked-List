@@ -139,7 +139,7 @@ unsigned int ImgList::GetDimensionFullX() const {
     while (n != NULL) {
 
         if (n->skipright != 0) {  //assume northwest does not have skipped left nodes
-        dim += n->skipright;
+        dim += n->skipright + 1;
         } 
 
     dim += 1;
@@ -170,9 +170,53 @@ unsigned int ImgList::GetDimensionFullX() const {
  * using the "distanceTo" function found in RGBAPixel.h.
  */
 ImgNode* ImgList::SelectNode(ImgNode* rowstart, int selectionmode) {
-    // add your implementation below
+    ImgNode* min;
+    double minSoFar;
+    double brightness;
+    double dist;
+    if (selectionmode == 0) { //assume exclude first and last nodes
+
+        rowstart = rowstart->east;
+
+        min = rowstart;
+
+        minSoFar = ((rowstart->colour.r + rowstart->colour.g + rowstart->colour.b) * rowstart->colour.a);
+
+        rowstart = rowstart->east;
+
+        while (rowstart->east != NULL) {
+
+            brightness = ((rowstart->colour.r + rowstart->colour.g + rowstart->colour.b) * rowstart->colour.a);
+
+            if (brightness < minSoFar) {
+                minSoFar = brightness;
+                min = rowstart;
+
+            }
+
+            rowstart = rowstart->east;
+
+        }
+
+    } else if (selectionmode == 1) {
+        rowstart = rowstart->east;
+        min = rowstart;
+        minSoFar = rowstart->colour.distanceTo(rowstart->east->colour) + rowstart->colour.distanceTo(rowstart->west->colour);
+
+        while (rowstart->east != NULL) {
+            dist = rowstart->colour.distanceTo(rowstart->east->colour) + rowstart->colour.distanceTo(rowstart->west->colour);
+
+            if (dist < minSoFar) {
+                minSoFar = dist;
+                min = rowstart;
+            }
+
+            rowstart = rowstart->east;
+
+        }
+    }
   
-    return NULL;
+    return min;
 }
 
 /**
