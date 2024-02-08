@@ -91,15 +91,11 @@ unsigned int ImgList::GetDimensionX() const {
     ImgNode* n = northwest;
     int dim = 0;
     while (n->east != NULL) {
-        dim = dim + 1 + n->skipright;           // add current node + any skipped
+        dim++;
         n = n->east;
     }
-
-    // last node in the row
-    dim = dim + 1 + n->skipright;
-    delete n;
-    n = NULL;
-    return dim;
+    
+    return dim + 1;
 }
 
 /**
@@ -118,9 +114,6 @@ unsigned int ImgList::GetDimensionY() const {
         dim += 1;
         n = n->south;
     }
-
-    delete n;
-    n = NULL;
     return dim + 1;
 }
 
@@ -135,19 +128,13 @@ unsigned int ImgList::GetDimensionFullX() const {
     // replace the following line with your implementation
     ImgNode* n = northwest;
     int dim = 0;
-
-    while (n != NULL) {
-
-        if (n->skipright != 0) {  //assume northwest does not have skipped left nodes
-        dim += n->skipright + 1;
-        } 
-
-    dim += 1;
-
-    n = n->east;
-
+    while (n->east != NULL) {
+        dim = dim + 1 + n->skipright;           // add current node + any skipped
+        n = n->east;
     }
 
+    // last node in the row
+    dim = dim + 1 + n->skipright;
     return dim;
 
 }
