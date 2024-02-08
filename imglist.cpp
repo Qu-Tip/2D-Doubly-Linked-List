@@ -148,26 +148,7 @@ unsigned int ImgList::GetDimensionFullX() const {
 
     }
 
-
-
-    
-    
-
-
-        RGBAPixel colour; // the RGBA colour of this node when rendered
-        ImgNode* north;   // pointer to the northern neighbour, if one exists; NULL otherwise
-        ImgNode* east;    // pointer to the eastern neighbour, if one exists; NULL otherwise
-        ImgNode* south;   // pointer to the southern neighbour, if one exists; NULL otherwise
-        ImgNode* west;    // pointer to the western neighbour, if one exists; NULL otherwise
-        unsigned int skipright; // number of nodes to this node's immediate east
-        // (in an original list) that were skipped
-        // to point to the current eastern neighbour
-        unsigned int skipleft;
-        unsigned int skipup;
-        unsigned int skipdown;
-
-
-
+    return dim;
 
 }
 
