@@ -378,9 +378,38 @@ void ImgList::Carve(unsigned int rounds, int selectionmode) {
  *       member attributes have values consistent with an empty list.
  */
 void ImgList::Clear() {
-    // add your implementation here
+    ImgNode* curr = northwest;
+    ImgNode* next = nullptr;
+    ImgNode* currRow = northwest;
+    ImgNode* nextRow = nullptr;
+
+    while (currRow != nullptr) {
+        nextRow = currRow->south;
+
+        while (curr != nullptr) {
+            next = curr->east;
+            delete curr;
+            curr = next;
+
+        } 
+        
+        next = nextRow;
+        delete currRow;
+        currRow = nextRow;
+        curr = next;
+
+    }
+
+   // delete next;
+   // next = NULL;
+    
+    northwest = nullptr;
+    southeast = nullptr;
 	
 }
+
+
+
 
 /**
  * Helper function copies the contents of otherlist and sets this list's attributes appropriately
@@ -389,8 +418,16 @@ void ImgList::Clear() {
  * @post this list has contents copied from by physically separate from otherlist
  */
 void ImgList::Copy(const ImgList& otherlist) {
-    // add your implementation here
-	
+
+    if (otherlist.northwest == nullptr) {
+        northwest = nullptr;
+        southeast = nullptr;
+        return;
+    } else {
+
+        //TODO
+
+    }   
 }
 
 /*************************************************************************************************
