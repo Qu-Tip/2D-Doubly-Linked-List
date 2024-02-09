@@ -161,18 +161,16 @@ unsigned int ImgList::GetDimensionFullX() const {
  * using the "distanceTo" function found in RGBAPixel.h.
  */
 ImgNode* ImgList::SelectNode(ImgNode* rowstart, int selectionmode) {
-    ImgNode* min;
     double minSoFar;
     double brightness;
     double dist;
+
+    rowstart = rowstart->east;
+    ImgNode* min = rowstart;
+
     if (selectionmode == 0) { //assume exclude first and last nodes
 
-        rowstart = rowstart->east;
-
-        min = rowstart;
-
         minSoFar = ((rowstart->colour.r + rowstart->colour.g + rowstart->colour.b) * rowstart->colour.a);
-
         rowstart = rowstart->east;
 
         while (rowstart->east != NULL) {
@@ -190,9 +188,9 @@ ImgNode* ImgList::SelectNode(ImgNode* rowstart, int selectionmode) {
         }
 
     } else if (selectionmode == 1) {
-        rowstart = rowstart->east;
-        min = rowstart;
+
         minSoFar = rowstart->colour.distanceTo(rowstart->east->colour) + rowstart->colour.distanceTo(rowstart->west->colour);
+        rowstart = rowstart->east;
 
         while (rowstart->east != NULL) {
             dist = rowstart->colour.distanceTo(rowstart->east->colour) + rowstart->colour.distanceTo(rowstart->west->colour);
@@ -228,6 +226,78 @@ ImgNode* ImgList::SelectNode(ImgNode* rowstart, int selectionmode) {
  *             and the smaller-valued average for diametric hues
  */
 PNG ImgList::Render(bool fillgaps, int fillmode) const {
+<<<<<<< HEAD
+
+    PNG outpng;                 // return png
+    ImgNode* n = northwest;
+    ImgNode* rowStart = northwest;
+    unsigned gap = 0;
+    RGBAPixel* px;
+
+    if (fillgaps == false) {
+        outpng.resize(GetDimensionX(), GetDimensionY());
+        for (unsigned int h = 0; h < GetDimensionY(); h++) {
+            for (unsigned int w = 0; w < GetDimensionX(); w++) {
+                *outpng.getPixel(w, h) = n->colour;
+                n = n->east;
+            }
+            rowStart = rowStart->south;
+            n = rowStart;
+        }
+
+    } else {
+        outpng.resize(GetDimensionFullX(), GetDimensionY());
+        for (unsigned int h = 0; h < GetDimensionY(); h++) {
+            for (unsigned int w = 0; w < GetDimensionFullX(); w++) {
+                *outpng.getPixel(w, h) = n->colour; 
+
+                if (fillmode == 0) {    // same color as node at left of gap
+                    if (n->skipright != 0) {                                   
+                        for (unsigned i = w + 1; i <= w + n->skipright; i++) {
+                            *outpng.getPixel(i, h) = n->colour;
+                            gap++;
+                        }
+                    }
+                } 
+
+                if (fillmode == 1) {    // avg of left and right node channels
+                    if (n->skipright != 0) {                                   
+                        for (unsigned i = w + 1; i <= w + n->skipright; i++) {  
+                            px = outpng.getPixel(i, h);                         
+                            px->r = ((n->colour.r + n->east->colour.r)/2);
+                            px->g = ((n->colour.g + n->east->colour.g)/2);
+                            px->b = ((n->colour.b + n->east->colour.b)/2);
+                            gap++;
+                        }
+                    }
+                }
+
+                if (fillmode == 2) {    // linear gradient between left and right node channels
+                    if (n->skipright != 0) {                                    
+                        
+                        for (unsigned i = w + 1; i <= w + n->skipright; i++) {       
+                            double fraction = (double) (i + 1) / (n->skipright + 1);
+                            px = outpng.getPixel(i, h);
+
+                            px->r = n->colour.r + fraction * (n->east->colour.r - n->colour.r);
+                            px->g = n->colour.g + fraction * (n->east->colour.g - n->colour.g);
+                            px->b = n->colour.b + fraction * (n->east->colour.b - n->colour.b);
+                            px->a = n->colour.a + fraction * (n->east->colour.a - n->colour.a);
+                            gap++;
+                        }
+                    }
+                }
+
+                w += gap;
+                gap = 0;
+                n = n->east;
+            }
+            rowStart = rowStart->south;
+            n = rowStart;
+        }
+    }
+
+=======
     // Add/complete your implementation below
     PNG outpng;
     unsigned x = 0;
@@ -309,8 +379,10 @@ PNG ImgList::Render(bool fillgaps, int fillmode) const {
         y++;
     }
   
+>>>>>>> 3103b32775899d5cf26aefddd843b8924aa38f04
     return outpng;
 }
+  
 
 /************
 * MODIFIERS *
@@ -333,6 +405,39 @@ PNG ImgList::Render(bool fillgaps, int fillmode) const {
  *        the left-most node satisfying the criterion (excluding the row's starting node)
  *        will be returned.
  */
+<<<<<<< HEAD
+void ImgList::Carve(int selectionmode) { 
+    
+    ImgNode* n = northwest;
+
+    for (unsigned int i = 0; i < GetDimensionY(); i++) {
+        ImgNode* r = SelectNode(n, selectionmode);
+        ImgNode* rl = r->west; 
+        ImgNode* rr = r->east; 
+
+        if (!(i == 0 || i == GetDimensionY() - 1)) {
+            ImgNode * ru = r->north; 
+            ImgNode * rd = r->south;
+
+            ru->skipdown++; 
+            rd->skipup++; 
+
+            rd->north = ru; 
+            ru->south = rd; 
+        }
+
+        rl->skipright++; 
+        rr->skipleft++; 
+
+        rl->east = rr; 
+        rr->west = rl; 
+        delete r; 
+        r = NULL;
+
+        n = n->south; 
+    }
+}
+=======
 void ImgList::Carve(int selectionmode) {
     ImgNode* n = northwest;
     ImgNode* selected;
@@ -359,6 +464,38 @@ void ImgList::Carve(int selectionmode) {
 
     }
 
+>>>>>>> 3103b32775899d5cf26aefddd843b8924aa38f04
+
+
+
+// void ImgList::Carve(int selectionmode) {
+
+//     ImgNode* rowStart = northwest;                                  // might be breaking rule
+//     while (rowStart != NULL) {
+//         ImgNode* selected = SelectNode(rowStart, selectionmode);    // selected = node chosen for removal
+
+//         selected->west->east = selected->east;                      // update west node
+//         selected->west->skipright += selected->skipright + 1;
+
+//         selected->east->west = selected->west;                      // update east node
+//         selected->east->skipleft += selected->skipleft + 1; 
+
+//         if (selected->north != NULL) {                              // not in first row
+//             selected->north->south = selected->south;               // update north node
+//             selected->north->skipdown += selected->skipdown + 1;
+//         } 
+
+//         if (selected->south != NULL) {                              // not in last row
+//             selected->south->north = selected->north;               // update south node
+//             selected->south->skipup += selected->skipup + 1;       
+//         }
+
+//         delete selected;
+//         selected = NULL;
+//         rowStart = rowStart->south;
+//     }
+    
+// }
 
 // note that a node on the boundary will never be selected for removal
 /**
